@@ -20,7 +20,8 @@
 <!-- Dialog title -->
         <v-row v-if="this.addBtn">
             <v-col>
-         <v-text-field class="input" v-model="name" :rules="[titlerules.required]" label="Title"></v-text-field>
+        
+         <v-text-field class="input" v-model="name" :rules="[titlerules.required]" :error-messages="this.nameError" label="Title"></v-text-field> 
             </v-col>
         </v-row>
 
@@ -37,6 +38,7 @@
                <v-text-field class="input" v-if="addBtn || currentTask" type="date" label="Deadline" v-model="due" :rules="[v => !!v || 'Deadline is required']"></v-text-field>
                 </v-col>
             </v-row>
+
 
         <!-- Dialog priority -->
         <v-row>
@@ -88,7 +90,14 @@ export default {
            desc: "",
            priority: null,
            due: null,
-
+           uniqueTitle: true,
+           nameError: [],
+          currentTaskk: {
+                name: '',
+                desc: '',
+                priority: null,
+                due: null,
+            },
            //snackbar properties
            showSnackbar: false,
            snackbarText: "",
@@ -113,6 +122,7 @@ export default {
            this.desc = ''
            this.due = ''
            this.priority = ''
+           this.nameError = ''
        },
 
        publish(e) {
@@ -129,16 +139,19 @@ export default {
                    priority: this.priority
                };
           //     this.$emit("set-snackbar-updated", true)
-            //   this.$emit("task-edited", update_task)
+               this.$emit("task-edited", update_task)
                this.desc = ''
                this.due = null
                this.priority = ''
                this.snackbarText = "Task was updated successfully!";
                this.showSnackbar = true;
                 }
-           else {
-
-               //add title unique stuff
+          else {
+                this.uniqueTitle = !this.taskList.some(task => task.name === this.name);
+                if (!this.uniqueTitle) {
+                    this.nameError.push("Title must be unique!")
+                    return;
+           }
            }
             if(!this.name || !this.desc || !this.due || !this.priority) {
             return
@@ -155,6 +168,7 @@ export default {
            this.desc = ''
            this.due = null
            this.priority= ''
+           this.nameError = []
            this.snackbarText = "Task was added successfully!";
            this.showSnackbar = true;
        }
@@ -165,6 +179,7 @@ export default {
        taskList: Array,
        add: Function,
        currentTask: Object,
+       uniqueTitle: Boolean
    },
    created() {
        if(this.addBtn) {
